@@ -1,0 +1,234 @@
+## combination of gates 
+# AND , AND → OR
+
+# Two T-junctions in series
+# Each bottom inlet extends y=0→400 (instead of y=0→40)
+# Units: microns
+
+random_seed 10
+
+graphics opengl
+graphic_iter 10
+
+dim 3
+boundaries x 0 600
+boundaries y 0 420
+boundaries z 0 20
+
+time_start 0
+time_stop 10000
+time_step 0.01
+
+# ============ MOLECULES ============
+species M
+difc M(all) 100
+color M(all) darkred
+drift M 0.1 0 0
+
+species N
+difc N(all) 100
+color N(all) lightblue
+drift N 0.1 0 0
+
+species I1
+difc I1(all) 100
+color I1(all) orange
+drift I1 0.1 0 0
+
+species I2
+difc I2(all) 100
+color I2(all) pink
+drift I2 0.1 0 0
+
+species M2
+difc M2(all) 100
+color M2(all) yellow
+drift M2 0.1 0 0 
+
+species O
+difc O(all) 100
+color O(all) black 
+drift O 0.1 0 0 
+
+# ============ SURFACES ============
+
+# --- Main horizontal channel (x=0→600, y=400→420, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=400)
+panel rect +1 0   400 0  90 20
+panel rect +1 110 400 0  190 20
+panel rect +1 320 400 0  280 20
+
+# Top (y=420): continuous roof
+panel rect -1 0 420 0 600 20
+
+# Left wall (x=0)
+panel rect +0 0 400 0 20 20
+
+# Right wall (x=600)
+panel rect -0 600 400 0 20 20
+
+# Front (z=0)
+panel rect +2 0 400 0 600 20
+
+# Back (z=20)
+panel rect -2 0 400 20 600 20
+end_surface
+
+
+# --- Vertical bottom inlet 1 (x=90–110, y=0–400) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall
+panel rect +0 90 0 0 400 20
+# Right wall - needs to be broken into two panels 
+# panel rect -0 110 0 0 400 20
+panel rect -0 110 0 0 90 20
+panel rect -0 110 110 0 290 20
+# Bottom
+panel rect -1 90 0 0 20 20
+# Front/back
+panel rect -2 90 0 0 20 400
+panel rect +2 90 0 20 20 400
+
+# Open top (y=400) connects into main channel
+end_surface
+
+
+# --- Vertical bottom inlet 2 (x=300–320, y=0–400) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall
+panel rect +0 300 0 0 400 20
+# Right wall - needs to be broken into two panels 
+# panel rect -0 320 0 0 400 20
+panel rect -0 320 0 0 90 20
+panel rect -0 320 110 0 290 20 
+# Bottom
+panel rect -1 300 0 0 20 20
+# Front/back
+panel rect -2 300 0 0 20 400
+panel rect +2 300 0 20 20 400
+
+# Open top (y=400) connects into main channel
+end_surface
+
+
+# --- Output/detector compartment ---
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+panel rect +1 450 400 0 150 20
+panel rect -1 450 420 0 150 20
+panel rect -0 600 400 0 20 20
+panel rect +2 450 400 0 150 20
+panel rect -2 450 400 20 150 20
+end_surface
+
+
+# --- Left side filter ---
+start_surface leftside
+ action all front reflect 
+ action O back transmit
+ action N back reflect 
+ action M2 back reflect 
+ action I1 back reflect
+ action I2 back reflect
+ action M back reflect 
+ color both 0 0 0 0.1
+ thickness 1
+ panel rect +0 450 400 0 20 20 
+end_surface 
+
+
+# --- AND gate first t-inlet compartment ---
+start_surface and_inlet1
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+panel rect +1 110 90 0 30 20 # bottom wall 
+panel rect -1 110 110 0 30 20 # top wall 
+panel rect -0 140 90 0 20 20 # right wall , no left wall 
+panel rect +2 110 90 0 30 20 # back wall 
+panel rect -2 110 90 20 30 20 # front wall 
+end_surface
+
+
+# --- AND gate second t-inlet compartment ---
+start_surface and_inlet2
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+panel rect +1 320 90 0 30 20
+panel rect -1 320 110 0 30 20
+panel rect -0 350 90 0 20 20 #right wall , no left wall 
+panel rect +2 320 90 0 30 20
+panel rect -2 320 90 20 30 20
+end_surface
+# ============ COMPARTMENTS ============
+start_compartment main
+ surface main_channel
+ point 300 410 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 100 200 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 200 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 500 50 10
+end_compartment
+
+start_compartment and_tinlet1
+ surface and_inlet1
+ point 120 95 10
+end_compartment
+
+start_compartment and_tinlet2
+ surface and_inlet2
+ point 330 100 10
+end_compartment
+
+
+# ============ INITIAL MOLECULES ============
+mol 50 I1 100 5 10     # I1 entering main channel
+mol 50 I2 310 5 10     # I2 entering bottom inlet
+#cmd @ 500 pointsource M 50 310 5 10
+
+
+mol 50 M 135 100 10
+mol 50 M 345 100 10 
+
+reaction rxnn1 M + I1 -> N 100
+reaction rxnn2 M + I2 -> N 100
+reaction rxnnO M2 + N -> O 100
+
+cmd @ 500 pointsource M2 50 5 410 10
+
+
+output_files combo_output.txt
+cmd N 1000 molcountspace N x 450 600 1 40 60 0 20 0 combo_output.txt
+
+end_file
+

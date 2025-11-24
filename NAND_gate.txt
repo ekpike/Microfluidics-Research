@@ -1,0 +1,171 @@
+# NAND 
+
+# take the typical and gate , then put an inverter after it 
+
+
+# ========================================
+# T-Junction channel geometry (bottom inlet)
+# Units: microns
+# ========================================
+
+graphics opengl
+graphic_iter 10
+
+# units um ms
+
+dim 3
+boundaries x 0 600
+boundaries y 0 100
+boundaries z 0 20
+
+time_start 0
+time_stop 10000
+time_step 0.01
+
+# ============ MOLECULES ============
+species M
+difc M(all) 100
+color M(all) darkred
+drift M 0.1 0 0
+
+species N
+difc N(all) 100
+color N(all) lightblue
+drift N 0.1 0 0
+
+species I1
+difc I1(all) 100
+color I1(all) orange
+drift I1 0.1 0 0
+
+species M2 
+difc M2(all) 100
+color M2(all) yellow
+drift M2 0.1 0 0 
+
+species O
+difc O(all) 100
+color O(all) black
+drift O 0.1 0 0 
+
+# ============ SURFACES ============
+
+# --- Main horizontal channel (x=0→600, y=40→60, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=40)
+#panel rect +1 0 40 0 600 20
+panel rect +1 0   40 0  90 20
+panel rect +1 110 40 0 290 20
+panel rect +1 420 40 0 180 20
+
+# Top (y=60)
+panel rect -1 0 60 0 600 20
+#panel rect -1 110 60 0 90 20
+
+# Left (x=0)
+panel rect +0 0 40 0 20 20
+
+# Right (x=400)
+panel rect -0 600 40 0 20 20
+
+# Front (z=0)
+panel rect +2 0 40 0 600 20
+
+# Back (z=20)
+panel rect -2 0 40 20 600 20
+end_surface
+
+
+# --- Vertical inlet (x=90→110, y=0→40, z=0→20) ---
+start_surface inlet_bottom
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=90)
+panel rect +0 90 0 0 40 20
+
+# Right wall (x=110)
+panel rect -0 110 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 90 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 90 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 90 0 20 20 40
+
+# Do NOT close the top at y=40 (that’s the join plane)
+end_surface
+
+start_surface leftside
+ action all front reflect 
+ action M2 back transmit
+ action I1 back reflect
+ action O back reflect 
+ action M back reflect 
+ action N back reflect 
+ color both 0 0 0 0.1
+ thickness 1
+ panel rect +0 550 40 0 20 20 
+ 
+ 
+end_surface 
+
+# --- Inverter junction (x = 400-420) ---
+start_surface invertor_junction
+action all both reflect 
+color both 0 0 0 0.1
+thickness 1 
+
+# Left wall (x=400)
+panel rect +0 400 0 0 40 20
+
+# Right wall (x=420)
+panel rect -0 420 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 400 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 400 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 400 0 20 20 40
+end_surface 
+# ============ COMPARTMENTS ============
+start_compartment main
+ surface main_channel
+ point 100 50 10
+end_compartment
+
+start_compartment inlet
+ surface inlet_bottom
+ point 100 20 10
+end_compartment
+
+
+start_compartment not_gate
+surface invertor_junction
+point 410 5 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+#mol 50 M 100 1 10    # in bottom inlet
+#mol 50 I1 50 50 10    # in main channel (for test)
+
+
+cmd @ 5000 pointsource M2 50 410 1 10
+reaction rxn I1 + M -> N 100
+reaction rnxo N + M2 -> O 100
+
+output_files nand_output.txt
+cmd N 100 molcountspace M2 x 550 600 1 40 60 0 20 0 nand_output.txt
+
+end_file

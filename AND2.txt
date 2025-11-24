@@ -1,0 +1,203 @@
+# AND Gate preliminary design (corrected)
+graphics opengl
+graphic_iter 10
+
+units um ms
+
+dim 3
+boundaries x 0 720
+boundaries y 0 230
+boundaries z 0 20   # <-- changed from 0 10 to match panels and compartments
+
+time_start 0
+time_stop 500
+time_step 0.01
+
+# ============ MOLECULES ============
+species A
+difc A(all) 100
+color A(all) darkred
+drift A 0.01 0 0
+
+species B
+difc B(all) 100
+color B(all) darkblue
+drift B 0.01 0 0
+
+species C
+difc C(all) 100
+color C(all) green
+drift C 0.01 0 0
+
+# ============ SURFACES ============
+
+# TOP T-junction
+start_surface top_t_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # bottom (y=210) — use start+extent style: x y z dx dy dz
+ panel rect +1 0 210 0 250 20
+
+ # top (y=230)
+ panel rect -1 0 230 0 250 20
+
+ # left wall (x=0)
+ panel rect +0 0 210 0 20 20
+
+ # front (z=0)
+ panel rect +2 0 210 0 250 20
+
+ # back (z=20)
+ panel rect -2 0 210 20 250 20
+end_surface
+
+# BOTTOM T-junction (kept as you had it but z extents now valid)
+start_surface bottom_t_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +1 0 30 0 250 20  # bottom -> uses full section
+ panel rect -1 0 50 0 250 20  # top
+ panel rect +0 0 30 0 20 20   # left
+ panel rect -0 250 30 0 20 20 # right (closed here; reopen if needed)
+ panel rect +2 0 30 0 250 20  # front
+ panel rect -2 0 30 20 250 20 # back
+end_surface
+
+# Parallel channel (kept, but ensure gaps line up)
+start_surface parallel_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +0 250 50 0 160 20
+ panel rect -0 270 30 0 90 20
+ panel rect -0 270 140 0 90 20
+ panel rect -1 250 230 0 20 20
+ panel rect +1 250 0 0 20 20
+ panel rect +2 250 30 0 20 200
+ panel rect -2 250 30 20 20 200
+end_surface
+
+# MAIN CHANNEL (corrected top panel line)
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # Bottom (y=120) with gaps for junctions
+ panel rect +1 270 120 0 50 20
+ panel rect +1 340 120 0 180 20
+ panel rect +1 540 120 0 180 20
+
+ # Top (y=140): continuous roof — REPLACED the incorrect coordinates with consistent ones
+ panel rect -1 270 140 0 450 20
+
+ # Right wall (x=720)
+ panel rect -0 720 120 0 20 20
+
+ # Front/back
+ panel rect +2 270 120 0 450 20
+ panel rect -2 270 120 20 450 20
+end_surface
+
+# inlet_bottom1 (first bottom T at x=320..340, opens at y=120)
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +0 320 90 0 30 20
+ panel rect -0 340 90 0 30 20
+ panel rect +1 320 90 0 20 20
+ panel rect -2 320 90 0 20 30
+ panel rect +2 320 90 20 20 30
+ # top is open (y=120)
+end_surface
+
+# inlet_bottom2 — FIXED obvious copy-paste coordinates (was using 520/540)
+# comment: second T at x=300..320, opens at y=40
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +0 300 40 0 20 20   # left wall at x=300, extent 20 in x -> covers to 320
+ panel rect -0 320 40 0 20 20   # right wall at x=320
+ panel rect +1 300 40 0 20 20   # bottom wall (y=40)
+ panel rect -2 300 40 0 20 30
+ panel rect +2 300 40 20 20 30
+ # top (y opening to main) left open
+end_surface
+
+# outlet/detector (kept)
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +1 670 120 0 50 20
+ panel rect -1 720 140 0 50 20
+ panel rect +0 670 120 0 20 20
+ panel rect -0 720 120 0 20 20
+ panel rect +2 670 120 0 50 20
+ panel rect -2 670 120 20 50 20
+end_surface
+
+# ============ COMPARTMENTS ============
+start_compartment bottom_T_channel
+ surface bottom_t_channel
+ point 5 31 10
+end_compartment
+
+start_compartment bottom_T_inlet
+ surface bottom_t_inlet
+ point 60 5 10
+end_compartment
+
+start_compartment top_T_channel
+ surface top_t_channel
+ point 5 220 10
+end_compartment
+
+start_compartment top_T_inlet
+ surface top_t_inlet
+ point 60 185 10
+end_compartment
+
+start_compartment main
+ surface main_channel
+ point 280 130 10
+end_compartment
+
+start_compartment parallel
+ surface parallel_channel
+ point 260 130 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 330 95 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 45 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 710 130 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+mol 100 A 10 10 10
+mol 100 B 60 185 10
+mol 100 B 10 220 10
+
+reaction rxn A + B -> C 100
+
+end_file

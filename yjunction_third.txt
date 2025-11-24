@@ -1,0 +1,149 @@
+# Y junction at the microfluidic transmitter 
+graphics opengl
+graphic_iter 10
+
+units um ms
+dim 3
+boundaries x 0 400
+boundaries y 0 200
+boundaries z 0 20
+
+time_start 0
+time_stop 100
+time_step 0.01
+
+species A
+difc A(all) 100 #check units
+color A(all) darkred
+drift A 0.01 0 0 #want drift to be laminar and all push forward - can decrease the flow rate or the diffusion 
+
+species B
+difc B(all) 100
+color B(all) blue
+drift B 0.01 0 0
+
+species C
+difc C(all) 100
+color C(all) green
+drift C 0.01 0 0
+
+
+# ============ MAIN CHANNEL ============
+# Main channel runs from x=30–400, y=40–60, z=0–10
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # NOTE: left wall at x=30 is intentionally omitted so the inlet polygons form the merge.
+ # Right wall (x=400)
+ panel rect -0 400 40 0 20 10
+
+ # Front wall (y=40)
+ panel rect +1 30 40 0 370 10
+
+ # Back wall (y=60)
+ panel rect -1 30 60 0 370 10
+
+ # Floor (z=0)
+ panel rect +2 30 40 0 370 20
+
+ # Ceiling (z=10)
+ panel rect -2 30 40 10 370 20
+end_surface
+
+
+# ============ TOP INLET (angled trapezoid) ============
+# x=0–30, at x=0 y=60–80 ; at x=30 y=50–60
+start_surface top_inlet
+ action all both reflect
+ color both 0 0 0 0
+ thickness 1
+
+ # Left face (x=0): P1(0,60,0), P2(0,80,0), P3(0,80,10), P4(0,60,10)
+ panel tri 0 60 0   0 80 0   0 80 10
+ panel tri 0 60 0   0 80 10  0 60 10
+
+ # Right face at join (x=30): Q1(30,50,0), Q2(30,60,0), Q3(30,60,10), Q4(30,50,10)
+ #panel tri 30 50 0  30 60 0  30 60 10
+ #panel tri 30 50 0  30 60 10 30 50 10
+
+ # Front slanted face (lower-y side): P1 -> Q1 -> Q4 -> P4
+ panel tri 0 60 0   30 50 0   30 50 10
+ panel tri 0 60 0   30 50 10  0 60 10
+
+ # Back slanted face (higher-y side): P2 -> Q2 -> Q3 -> P3
+ panel tri 0 80 0   30 60 0   30 60 10
+ panel tri 0 80 0   30 60 10  0 80 10
+
+ # Floor (z=0) — two tris: P1,P2,Q2,Q1
+ panel tri 0 60 0   0 80 0   30 60 0
+ panel tri 0 60 0   30 60 0  30 50 0
+
+ # Ceiling (z=10) — two tris: P4,P3,Q3,Q4
+ panel tri 0 60 10  0 80 10  30 60 10
+ panel tri 0 60 10  30 60 10 30 50 10
+
+end_surface
+
+
+# ============ BOTTOM INLET (angled trapezoid) ============
+# x=0–30, at x=0 y=20–40 ; at x=30 y=40–50
+start_surface bottom_inlet
+ action all both reflect
+ color both 0 0 0 0
+ thickness 1
+
+ # Left face (x=0): Pb1(0,20,0), Pb2(0,40,0), Pb3(0,40,10), Pb4(0,20,10)
+ panel tri 0 20 0   0 40 0   0 40 10
+ panel tri 0 20 0   0 40 10  0 20 10
+
+ # Right face at join (x=30): Qb1(30,40,0), Qb2(30,50,0), Qb3(30,50,10), Qb4(30,40,10)
+ #panel tri 30 40 0  30 50 0  30 50 10
+ #panel tri 30 40 0  30 50 10 30 40 10
+
+ # Front slanted face (lower-y side): Pb1 -> Qb1 -> Qb4 -> Pb4
+ panel tri 0 20 0   30 40 0   30 40 10
+ panel tri 0 20 0   30 40 10  0 20 10
+
+ # Back slanted face (higher-y side): Pb2 -> Qb2 -> Qb3 -> Pb3
+ panel tri 0 40 0   30 50 0   30 50 10
+ panel tri 0 40 0   30 50 10  0 40 10
+
+ # Floor (z=0) — two tris: Pb1,Pb2,Qb2,Qb1
+ panel tri 0 20 0   0 40 0   30 50 0
+ panel tri 0 20 0   30 50 0  30 40 0
+
+ # Ceiling (z=10) — two tris: Pb4,Pb3,Qb3,Qb4
+ panel tri 0 20 10  0 40 10  30 50 10
+ panel tri 0 20 10  30 50 10 30 40 10
+
+end_surface
+
+
+# ============ COMPARTMENTS ============
+start_compartment junction
+ surface main_channel
+ point 100 50 5
+end_compartment
+
+start_compartment inlet_1
+ surface top_inlet
+ point 15 70 5
+end_compartment
+
+start_compartment inlet_2
+ surface bottom_inlet
+ point 15 30 5
+end_compartment
+
+
+# ============ INITIAL MOLECULES ============
+mol 300 A 10 70 5   # from top inlet
+mol 300 B 10 30 5   # from bottom inlet
+
+reaction rxn A + B -> C 10
+
+#mol 100 C 100 50 5  # inside main channel
+
+end_file

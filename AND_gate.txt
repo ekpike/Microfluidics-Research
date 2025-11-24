@@ -1,0 +1,384 @@
+# AND Gate preliminary design 
+
+graphics opengl
+graphic_iter 10
+
+units um ms
+
+dim 3
+boundaries x 0 720
+boundaries y 0 240
+boundaries z 0 20
+
+time_start 0
+time_stop 10000
+time_step 0.01
+
+# ============ MOLECULES ============
+species M
+difc M(all) 10
+color M(all) darkred
+drift M 0.1 0 0 #look up how drift works in pos / neg 
+
+species N
+difc N(all) 10
+color N(all) lightblue
+drift N 0.1 0 0
+
+species I1
+difc I1(all) 10
+color I1(all) orange
+drift I1 0.1 0 0
+
+species I2
+difc I2(all) 10
+color I2(all) pink
+drift I2 0.1 0 0
+
+species ThL
+difc ThL(all) 10
+color ThL(all) green
+drift ThL 0.1 0 0
+
+species W
+difc W(all) 10
+color W(all) lightviolet
+drift W 0.1 0 0
+
+species Amp
+difc Amp(all) 10
+color Amp(all) silver
+drift Amp 0.1 0 0
+
+species O
+difc O(all) 100
+color O(all) black
+drift O 0.1 0 0
+
+# ============ SURFACES ============
+
+# TOP T-junction 
+
+# --- Main horizontal channel (x=0→250, y=210-230, z=0→20) ---
+start_surface top_t_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=210)
+#panel rect +1 0 210 0 250 20
+
+panel rect +1 0  210 0  50 20
+panel rect +1 70 210 0  180 20
+
+# Top (y=230)
+panel rect -1 0 230 0 250 20
+
+# Left (x=0)
+panel rect +0 0 210 0 20 20
+
+# Right (x=250) needs to be open to join with the next channel 
+# panel rect -0 250 210 0 20 20
+
+# Front (z=0)
+panel rect -2 0 210 0 250 20
+
+# Back (z=20)
+panel rect +2 0 210 20 250 20
+end_surface
+
+# --- Vertical inlet (x=50→70, y=180→210, z=0→20) ---
+start_surface top_t_inlet
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=50)
+panel rect +0 50 180 0 30 20
+
+# Right wall (x=70)
+panel rect -0 70 180 0 30 20
+
+# Bottom wall (y=180)
+panel rect -1 50 180 0 20 20
+
+# Front wall (z=0)
+panel rect -2 50 180 0 20 30
+
+# Back wall (z=20)
+panel rect +2 50 180 20 20 30
+
+# Do NOT close the top at y=210 (that’s the join plane)
+end_surface
+
+# -- BOTTOM T-junction ---
+
+# --- Main horizontal channel (x=0→250, y=30→50, z=0→20) ---
+start_surface bottom_t_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=30)
+#panel rect +1 0 30 0 250 20
+
+panel rect +1 0  30 0  50 20
+panel rect +1 70 30 0  180 20
+
+# Top (y=50)
+panel rect -1 0 50 0 250 20
+
+# Left (x=0)
+panel rect +0 0 30 0 20 20
+
+# Right (x=250) needs to be open to join with the next channel 
+# panel rect -0 250 40 0 20 20
+
+# Front (z=0)
+panel rect +2 0 30 0 250 20
+
+# Back (z=20)
+panel rect -2 0 30 20 250 20
+
+end_surface
+
+
+# --- Bottom Vertical inlet (x=50→70, y=0→30, z=0→20) ---
+start_surface bottom_t_inlet
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=50)
+panel rect +0 50 0 0 30 20
+
+# Right wall (x=70)
+panel rect -0 70 0 0 30 20
+
+# Bottom wall (y=0)
+panel rect -1 50 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 50 0 0 20 30
+
+# Back wall (z=20)
+panel rect +2 50 0 20 20 30
+
+# Do NOT close the top at y=40 (that’s the join plane)
+end_surface
+
+
+# --- Parallel Connection channel (connects in the middle to the central main channel --- 
+start_surface parallel_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+# Left wall (x=250) 
+panel rect +0 250 20 0 10 20 
+panel rect +0 250 50 0 160 20
+panel rect +0 250 230 0 10 20
+
+
+# Right wall (x=270). leave gaps for junction in the middle (two right hand walls with gap)
+panel rect -0 270 20 0 100 20
+panel rect -0 270 140 0 100 20
+
+# Top wall (y=230)
+panel rect -1 250 240 0 20 20 
+
+# Bottom wall (y=20)
+panel rect +1 250 20 0 20 20 
+
+# Front wall (z = 0)
+panel rect +2 250 20 0 20 220
+
+# Back wall (z=20)
+panel rect -2 250 20 20 20 220 
+end_surface
+
+
+# --- Main horizontal channel (x=270→720, y=120→140, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=120). Leave gaps for junctions at x=110→130 and x=320→340
+panel rect +1 270 120 0  50 20
+panel rect +1 340 120 0  180 20   # between first and second junction: 130->320
+panel rect +1 540 120 0  180 20   # downstream after second junction
+
+# Top (y=140): continuous roof
+panel rect -1 270 140 0 450 20
+
+# Left wall (x=270) 
+#panel rect +0 270 120 0 20 20
+#left wall needs to be open for the connection between the straight channel 
+
+# Right wall (x=720) 
+panel rect -0 720 120 0 20 20
+
+# Front (z=0)
+panel rect +2 270 120 0 450 20
+
+# Back (z=20)
+panel rect -2 270 120 20 450 20
+end_surface
+
+# --- Vertical bottom inlet 1 (first T at x=320..340, opens at y=120) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=110)
+panel rect +0 320 90 0 30 20
+
+# Right wall (x=130)
+panel rect -0 340 90 0 30 20
+
+# Bottom wall (y=90)
+panel rect +1 320 90 0 20 20
+
+# Front wall (z=0)
+panel rect -2 320 90 0 20 30
+
+# Back wall (z=20)
+panel rect +2 320 90 20 20 30
+
+# Do NOT close top (y=120): opens into main channel
+end_surface
+
+# --- Vertical bottom inlet 2 (second T at x=300..320, opens at y=40) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=520)
+panel rect +0 520 90 0 30 20
+
+# Right wall (x=340)
+panel rect -0 540 90 0 30 20
+
+# Bottom wall (y=90)
+panel rect +1 520 90 0 20 20
+
+# Front wall (z=0)
+panel rect -2 520 90 0 20 30
+
+# Back wall (z=20)
+panel rect +2 520 90 20 20 30
+
+# Do NOT close top (y=40): opens into main channel
+end_surface
+
+# output/detector compartment at downstream end (x>450)
+start_surface outlet_surface
+ #action all both reflect
+ action M both reflect
+ action N both reflect
+ action I1 both reflect
+ action I2 both reflect
+ action ThL both reflect
+ action W both reflect
+ action Amp both reflect
+ #action O both transmit
+ color both 0 0 0 0.1
+ thickness 1
+ # small box near x = 670..720, y=120..140, z=0..20
+ panel rect +1 670 120 0 50 20 #bottom 
+ panel rect -1 720 140 0 50 20 #top
+  
+ panel rect +0 670 120 0 20 20 
+ action O front transmit
+ action O back reflect 
+ #action front transmit panel +0 670 120 0 20 20 O
+ panel rect -0 720 120 0 20 20
+  
+ panel rect +2 670 120 0 50 20
+
+ panel rect -2 670 120 20 50 20
+  
+end_surface
+
+# ============ COMPARTMENTS ============
+start_compartment bottom_T_channel
+ surface bottom_t_channel
+ point 5 35 10
+end_compartment
+
+start_compartment bottom_T_inlet
+ surface bottom_t_inlet
+ point 60 5 10
+end_compartment
+
+start_compartment top_T_channel
+ surface top_t_channel
+ point 5 220 10
+end_compartment
+
+start_compartment top_T_inlet
+ surface top_t_inlet
+ point 60 185 10
+end_compartment
+
+
+start_compartment main
+ surface main_channel
+ point 280 130 10
+end_compartment
+
+start_compartment parallel 
+ surface parallel_channel
+ point 260 130 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 330 95 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 530 95 10 
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 710 130 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+# Place molecules inside the inlets and main channel upstream
+# You can also choose to inject molecules over time instead of placing them here.
+
+
+mol 100 M 60 185 10      # M entering top T inlet 
+mol 100 M 60   5 10      # M entering bottom T inlet 
+mol 100 I1 21 220 10     # I1 entering top channel
+mol 100 I2 21  40 10     # I2 entering bottom channel
+
+cmd @ 10 pointsource ThL 100 330 95 10    # ThL in T junction 
+cmd @ 100 pointsource Amp 100 530 95 10    # Amp in final T junction
+
+# Message: cmd format: type [on off dt] string
+reaction rxnn1 M + I1 -> N 100
+reaction rxnn2 M + I2 -> N 100
+reaction rxnW N + ThL -> W 100 #less of this should react? 
+reaction rxno N + Amp -> N + O 100
+
+# Reminder of colors of reactants
+# M - darkred
+# I1 - orange
+# I2 - pink 
+# N - lightblue
+# ThL - green
+# W - lightviolet
+# Amp - silver 
+# O - black 
+
+#text_display time N Amp( front ) O ( front ) W
+
+
+end_file

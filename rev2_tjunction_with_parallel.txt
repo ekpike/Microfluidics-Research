@@ -1,0 +1,162 @@
+# ========================================
+# Parallel vertical + main channel + 2 T-junctions
+# ========================================
+
+graphics opengl
+graphic_iter 10
+
+units um ms
+dim 3
+boundaries x 0 600
+boundaries y 0 100
+boundaries z 0 20
+
+time_start 0
+time_stop 200
+time_step 0.01
+
+# ============ MOLECULES ============
+species A
+difc A(all) 100
+color A(all) darkred
+drift A 0.01 0 0
+
+species B
+difc B(all) 100
+color B(all) darkblue
+drift B 0.01 0 0
+
+species C
+difc C(all) 100
+color C(all) green
+drift C 0.01 0 0
+
+# ============ SURFACES ============
+
+# --- Vertical channel (x=0→20, y=0→100, z=0→20) ---
+start_surface vertical_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Left wall (x=0)
+panel rect +0 0 0 0 100 20
+
+# Right wall (x=20), with a gap from y=40→60 to connect to main channel
+panel rect -0 20 0 0 40 20     # lower section
+panel rect -0 20 60 0 40 20   # upper section
+
+# Bottom (y=0)
+panel rect +1 0 0 0 20 20
+
+# Top (y=100)
+panel rect -1 0 100 0 20 20
+
+# Front and back
+panel rect +2 0 0 0 100 20
+panel rect -2 0 0 20 100 20
+end_surface
+
+
+# --- Main horizontal channel (x=20→600, y=40→60, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Bottom wall (y=40), with gaps at the two T-junctions
+panel rect +1 20 40 0 90 20
+panel rect +1 110 40 0 300 20
+panel rect +1 320 40 0 600 20
+
+# Top wall (y=60): continuous
+panel rect -1 20 60 0 600 20
+
+# Left wall (x=20): OPEN (connects to vertical channel)
+# Right wall (x=600)
+panel rect -0 600 40 0 20 20
+
+# Front and back
+panel rect +2 20 40 0 600 20
+panel rect -2 20 40 20 600 20
+end_surface
+
+
+# --- Vertical bottom inlet 1 (x=90→110) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+panel rect +0 90 0 0 40 20
+panel rect -0 110 0 0 40 20
+panel rect -1 90 0 0 20 20
+panel rect -2 90 0 0 20 40
+panel rect +2 90 0 20 20 40
+# Open top (y=40)
+end_surface
+
+# --- Vertical bottom inlet 2 (x=300→320) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+panel rect +0 300 0 0 40 20
+panel rect -0 320 0 0 40 20
+panel rect -1 300 0 0 20 20
+panel rect -2 300 0 0 20 40
+panel rect +2 300 0 20 20 40
+# Open top (y=40)
+end_surface
+
+
+# --- Outlet surface (x=450→600, y=40→60) ---
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+panel rect +1 450 40 0 600 20
+panel rect -1 600 60 0 600 20
+panel rect +0 450 40 0 20 20
+panel rect -0 600 40 0 20 20
+panel rect +2 450 40 0 600 20
+panel rect -2 450 40 20 600 20
+end_surface
+
+# ============ COMPARTMENTS ============
+start_compartment vertical
+ surface vertical_channel
+ point 10 50 10
+end_compartment
+
+start_compartment main
+ surface main_channel
+ point 300 50 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 100 20 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 20 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 500 50 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+mol 200 A 10 10 10       # A molecules start in vertical channel
+mol 150 B 50 50 10       # B in main channel (before inlets)
+mol 150 A 100 1 10       # A in first inlet
+mol 150 A 310 1 10       # A in second inlet
+
+reaction rxn A + B -> C 100
+
+end_file

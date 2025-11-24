@@ -1,0 +1,196 @@
+# New OR gate design (simpler geometry)
+
+#Two T-junctions in series
+# Combination of a straight channel and two T-junction inlets (bottom inlets)
+# Units: microns
+
+# RNG seed: change this number between runs to get different pseudo-random sequences
+# Example: seed 1, seed 2, ... , seed 10000
+random_seed 10
+
+graphics opengl
+graphic_iter 10
+
+# units um ms
+
+dim 3
+boundaries x 0 600
+boundaries y 0 100
+boundaries z 0 20
+
+time_start 0
+time_stop 10000
+time_step 0.01
+
+
+# ============ MOLECULES ============
+species M
+difc M(all) 100
+color M(all) darkred
+drift M 0.1 0 0 #look up how drift works in pos / neg 
+
+species N
+difc N(all) 100
+color N(all) lightblue
+drift N 0.1 0 0
+
+species I1
+difc I1(all) 100
+color I1(all) orange
+drift I1 0.1 0 0
+
+species I2
+difc I2(all) 100
+color I2(all) pink
+drift I2 0.1 0 0
+
+
+
+# ============ SURFACES ============
+
+# --- Main horizontal channel (x=0→600, y=40→60, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Bottom (y=40). Leave gaps for junctions at x=90→110 and x=300→320
+panel rect +1 0   40 0  90 20
+panel rect +1 110 40 0  190 20   # between first and second junction: 110->300
+panel rect +1 320 40 0  280 20   # downstream after second junction
+
+# Top (y=60): continuous roof
+panel rect -1 0 60 0 600 20
+
+# Left wall (x=0)
+panel rect +0 0 40 0 20 20
+
+# Right wall (x=600)
+panel rect -0 600 40 0 20 20
+
+# Front (z=0)
+panel rect +2 0 40 0 600 20
+
+# Back (z=20)
+panel rect -2 0 40 20 600 20
+end_surface
+
+# --- Vertical bottom inlet 1 (first T at x=90..110, opens at y=40) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=90)
+panel rect +0 90 0 0 40 20
+
+# Right wall (x=110)
+panel rect -0 110 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 90 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 90 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 90 0 20 20 40
+
+# Do NOT close top (y=40): opens into main channel
+end_surface
+
+# --- Vertical bottom inlet 2 (second T at x=300..320, opens at y=40) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+
+# Left wall (x=300)
+panel rect +0 300 0 0 40 20
+
+# Right wall (x=320)
+panel rect -0 320 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 300 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 300 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 300 0 20 20 40
+
+# Do NOT close top (y=40): opens into main channel
+end_surface
+
+# output/detector compartment at downstream end (x>450)
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.1
+ thickness 1
+ # small box near x = 450..600, y=40..60, z=0..20
+ panel rect +1 450 40 0 150 20
+ panel rect -1 450 60 0 150 20
+ #panel rect +0 450 40 0 20 20
+ panel rect -0 600 40 0 20 20
+ panel rect +2 450 40 0 150 20
+ panel rect -2 450 40 20 150 20
+end_surface
+
+
+start_surface leftside
+ action all front reflect 
+ action N back transmit
+ action I1 back reflect
+ action I2 back reflect
+
+ action M back reflect 
+ color both 0 0 0 0.1
+ thickness 1
+ panel rect +0 450 40 0 20 20 
+ 
+ 
+end_surface 
+# ============ COMPARTMENTS ============
+start_compartment main
+ surface main_channel
+ point 300 50 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 100 20 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 20 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 500 50 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+# Place molecules inside the inlets and main channel upstream
+# You can also choose to inject molecules over time instead of placing them here.
+
+#mol 50 M 510 5 10      # M entering second inlet 
+#mol 50 I1 5 50 10    # I1 entering channel
+mol 50 I2 100 5 10     # I2 entering bottom inlet 
+
+cmd @ 500 pointsource M 50 310 5 10
+# Message: cmd format: type [on off dt] string
+reaction rxnn1 M + I1 -> N 100
+reaction rxnn2 M + I2 -> N 100
+
+output_files or_output.txt
+cmd N 1000 molcountspace N x 450 600 1 40 60 0 20 0 or_output.txt
+
+# Reminder of colors of reactants
+# M - darkred
+# I1 - orange
+# I2 - pink 
+# N - lightblue
+end_file

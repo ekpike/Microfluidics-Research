@@ -1,0 +1,180 @@
+# ========================================
+# Parallel vertical + main channel + 2 T-junctions
+# Corrected alignment so panels touch exactly (no gaps)
+# ========================================
+
+# seed 1
+
+graphics opengl
+graphic_iter 10
+
+units um ms
+dim 3
+boundaries x 0 600
+boundaries y 0 100
+boundaries z 0 20
+
+time_start 0
+time_stop 50
+time_step 0.01
+
+# ============ MOLECULES ============
+species A
+difc A(all) 100
+color A(all) darkred
+drift A 0.02 0 0
+
+species B
+difc B(all) 100
+color B(all) darkblue
+drift B 0.01 0 0
+
+species C
+difc C(all) 100
+color C(all) green
+drift C 0.01 0 0
+
+# ============ SURFACES ============
+# NOTE: all panels are defined so shared faces use the exact same coordinate values.
+
+# --- Vertical channel (x=0 → 20, y=0 →100, z=0 → 20) ---
+start_surface vertical_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # left wall at x = 0
+ panel rect +0 0   0  0 100 20
+
+ # right wall at x = 20, but leave gap between y = 40 and y = 60
+ # lower piece (y = 0 → 40)
+ panel rect -0 20  0  0 40 20
+ # upper piece (y = 60 →100)
+ panel rect -0 20  60 0 40 20
+
+ # bottom at y = 0
+ panel rect +1 0   0  0 20 20
+
+ # top at y = 100
+ panel rect -1 0  100  0 20 20
+
+ # front (z = 0)
+ panel rect +2 0   0  0 100 20
+
+ # back (z = 20)
+ panel rect -2 0   0 20 100 20
+end_surface
+
+
+# --- Main horizontal channel (x=20 → 600, y=40 → 60, z=0 →20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # bottom wall y=40: leave gaps for the two T-junctions (x ranges shown)
+ panel rect +1 20  40  0 70 20      # from x=20 → 90 (left of inlet1)
+ panel rect +1 110 40  0 190 20     # x=110 → 300 (between inlet1 and inlet2)
+ panel rect +1 320 40  0 280 20     # x=320 → 600 (downstream)
+
+ # top wall y=60 (continuous)
+ panel rect -1 20  60  0 580 20     # x=20 → 600 length 580
+
+ # left wall at x=20: THIS IS INTENTIONALLY OPEN BETWEEN y=40→60 so it connects to vertical channel's mid face.
+ # therefore we do NOT place a left-wall panel for the y=40→60 range.
+ # right wall at x=600
+ panel rect -0 600 40  0 20 20
+
+ # front (z=0) and back (z=20) cover the full main channel length
+ panel rect +2 20  40  0 580 20
+ panel rect -2 20  40 20 580 20
+end_surface
+
+
+# --- Vertical bottom inlet 1 (x = 90 → 110, opens at y = 40) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +0 90  0  0 40 20
+ panel rect -0 110 0  0 40 20
+ panel rect -1 90  0  0 20 20        # bottom (y=0)
+ panel rect +2 90  0  0 20 40        # front z=0..20
+ panel rect -2 90  0 20 20 40
+# top is open at y=40 to main channel
+end_surface
+
+
+# --- Vertical bottom inlet 2 (x = 300 → 320, opens at y = 40) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +0 300 0 0 40 20
+ panel rect -0 320 0 0 40 20
+ panel rect -1 300 0 0 20 20
+ panel rect +2 300 0 0 20 40
+ panel rect -2 300 0 20 20 40
+# top open at y=40
+end_surface
+
+
+# --- Outlet surface (x = 450 → 600, y=40→60) ---
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ panel rect +1 450 40 0 150 20
+ panel rect -1 600 60 0 600 20
+ panel rect +0 450 40 0 20 20
+ panel rect -0 600 40 0 20 20
+ panel rect +2 450 40 0 150 20
+ panel rect -2 450 40 20 150 20
+end_surface
+
+
+# ============ COMPARTMENTS ============
+start_compartment vertical
+ surface vertical_channel
+ point 10 50 10
+end_compartment
+
+start_compartment main
+ surface main_channel
+ point 300 50 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 100 20 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 20 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 500 50 10
+end_compartment
+
+
+# ============ INITIAL MOLECULES ============
+# Put A molecules in the vertical channel so they can move into main channel at x=20, y~40..60
+mol 200 A 10 20 10
+mol 100 A 10 80 10
+
+# Place some B upstream in main channel (x>20, before inlet1 at x=90)
+mol 150 B 40 50 10
+
+# Also seed small numbers in the inlet arms if desired (optional)
+mol 50 A 100 1 10
+mol 50 A 310 1 10
+
+reaction rxn A + B -> C 100
+
+end_file

@@ -1,0 +1,199 @@
+# Two t junctions with the parallel straight channel next to it 
+
+# Two T-junctions in series then a straight channel 
+# Combination of a straight channel and two T-junction inlets (bottom inlets)
+# Units: microns
+
+# RNG seed: change this number between runs to get different pseudo-random sequences
+# Example: seed 1, seed 2, ... , seed 10000
+# seed 1
+
+graphics opengl
+graphic_iter 10
+
+units um ms
+
+dim 3
+boundaries x 0 600
+boundaries y 0 100
+boundaries z 0 20
+
+time_start 0
+time_stop 200
+time_step 0.01
+
+# ============ MOLECULES ============
+species A #N
+difc A(all) 100
+color A(all) darkred
+drift A 0.01 0 0
+
+species B #ThL
+difc B(all) 100
+color B(all) darkblue
+drift B 0.01 0 0
+
+species C # W
+difc C(all) 100
+color C(all) green
+drift C 0.01 0 0
+
+#Amp
+
+#O
+
+# ============ SURFACES ============
+
+# --- Parallel vertical channel connected to main channel (before inlet1) ---
+start_surface parallel_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Left and right walls (x=50..70)
+panel rect +0 50 20 0 20 20
+panel rect -0 70 20 0 20 20
+
+# Front and back walls (z=0..20)
+panel rect +2 50 20 0 70 20
+panel rect -2 50 20 20 70 20
+
+# Bottom wall (y=20)
+panel rect -1 50 20 0 70 20
+
+# Leave the top open at y=40 to connect seamlessly to main channel bottom
+end_surface
+
+
+
+
+# --- Main horizontal channel (x=0→600, y=40→60, z=0→20) ---
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Bottom (y=40). Leave gaps for junctions at x=90→110 and x=300→320
+panel rect +1 0   40 0  90 20
+panel rect +1 110 40 0 300 20   # between first and second junction: 110->300
+panel rect +1 320 40 0 600 20   # downstream after second junction
+
+# Top (y=60): continuous roof
+panel rect -1 0 60 0 600 20
+
+# Left wall (x=0)
+panel rect +0 0 40 0 20 20
+
+# Right wall (x=600)
+panel rect -0 600 40 0 20 20
+
+# Front (z=0)
+panel rect +2 0 40 0 600 20
+
+# Back (z=20)
+panel rect -2 0 40 20 600 20
+end_surface
+
+# --- Vertical bottom inlet 1 (first T at x=90..110, opens at y=40) ---
+start_surface inlet_bottom1
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Left wall (x=90)
+panel rect +0 90 0 0 40 20
+
+# Right wall (x=110)
+panel rect -0 110 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 90 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 90 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 90 0 20 20 40
+
+# Do NOT close top (y=40): opens into main channel
+end_surface
+
+# --- Vertical bottom inlet 2 (second T at x=300..320, opens at y=40) ---
+start_surface inlet_bottom2
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+# Left wall (x=300)
+panel rect +0 300 0 0 40 20
+
+# Right wall (x=320)
+panel rect -0 320 0 0 40 20
+
+# Bottom wall (y=0)
+panel rect -1 300 0 0 20 20
+
+# Front wall (z=0)
+panel rect -2 300 0 0 20 40
+
+# Back wall (z=20)
+panel rect +2 300 0 20 20 40
+
+# Do NOT close top (y=40): opens into main channel
+end_surface
+
+# output/detector compartment at downstream end (x>450)
+start_surface outlet_surface
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+ # small box near x = 450..600, y=40..60, z=0..20
+ panel rect +1 450 40 0 600 20
+ panel rect -1 600 60 0 600 20
+ panel rect +0 450 40 0 20 20
+ panel rect -0 600 40 0 20 20
+ panel rect +2 450 40 0 600 20
+ panel rect -2 450 40 20 600 20
+end_surface
+
+# ============ COMPARTMENTS ============
+
+start_compartment parallel
+ surface parallel_channel
+ point 60 30 10
+end_compartment
+
+
+
+start_compartment main
+ surface main_channel
+ point 300 50 10
+end_compartment
+
+start_compartment inlet1
+ surface inlet_bottom1
+ point 100 20 10
+end_compartment
+
+start_compartment inlet2
+ surface inlet_bottom2
+ point 310 20 10
+end_compartment
+
+start_compartment outlet
+ surface outlet_surface
+ point 500 50 10
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+# Place molecules inside the inlets and main channel upstream
+# You can also choose to inject molecules over time instead of placing them here.
+# seed A molecules inside the parallel straight channel so they flow into the main channel
+mol 200 A 60 30 10    # 200 A at x=60, y=30, z=10 (inside parallel channel center)
+mol 200 A 100 1 10     # molecules A in inlet1 (around x=100, y~1..40)
+mol 150 A 310 1 10     # molecules A in inlet2 (around x=310)
+mol 200 B 50 50 10     # B in main channel before junction
+
+reaction rxn A + B -> C 100
+
+end_file

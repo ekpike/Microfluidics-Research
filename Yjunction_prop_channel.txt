@@ -1,0 +1,102 @@
+#Y junction at the microfluidic transmitter 
+graphics opengl #opens up the 3D visualizer
+graphic_iter 10 #frame update frequency , updates every 10 timesteps 
+
+units um ms
+
+dim 3
+boundaries x 0 400 #length
+boundaries y 0 200  #height
+boundaries z 0 20   #width
+
+time_start 0
+time_stop 100
+time_step 0.01  #using standard values from example simulations
+
+species A #sample species which will diffuse along the channel
+
+species B
+
+difc A(all) 100 # the diffusion coefficient is how fast particles spread due to Brownian motion, this is an estimate
+difc B(all) 100
+
+color A(all) darkred
+color B(all) darkblue
+# Need to start the diffusion of x many particles near inlet of channel
+
+drift A 0.1 0 0 # need to include drift
+drift B 0.1 0 0 
+
+# assumption that the particles will not absorb to the walls and will stay inside of the channel
+
+
+  
+  
+# Main channel: long rectangle, but starting at x=30 so inlets can connect
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+
+ # Left wall (x=30)
+ panel rect +0 30 0 0 100 10
+ # Right wall (x=400)
+ panel rect -0 400 0 0 100 10
+
+ # Front wall (y=0), continuous
+ panel rect +1 30 0 0 370 10
+ # Back wall (y=100), continuous
+ panel rect -1 30 100 0 370 10
+
+ # Floor (z=0)
+ panel rect +2 30 0 0 370 100
+ # Ceiling (z=10)
+ panel rect -2 30 0 10 370 100
+end_surface
+
+# Top inlet: rectangular prism x=0–30, y=70–90, z=0–10
+start_surface top_inlet
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+ panel rect +0 0 70 0 20 10   # x=0 wall
+ panel rect +1 0 70 0 30 10   # y=70 wall
+ panel rect -1 0 90 0 30 10   # y=90 wall
+ panel rect +2 0 70 0 30 20   # z=0 floor
+ panel rect -2 0 70 10 30 20  # z=10 ceiling
+end_surface
+
+# Bottom inlet: rectangular prism x=0–30, y=10–30, z=0–10
+start_surface bottom_inlet
+ action all both reflect
+ color both 0 0 0 0.0
+ thickness 1
+ panel rect +0 0 10 0 20 10   # x=0 wall
+ panel rect +1 0 10 0 30 10   # y=10 wall
+ panel rect -1 0 30 0 30 10   # y=30 wall
+ panel rect +2 0 10 0 30 20   # z=0 floor
+ panel rect -2 0 10 10 30 20  # z=10 ceiling
+end_surface
+
+
+start_compartment junction
+ surface main_channel
+ point 100 50 5
+end_compartment
+
+
+start_compartment inlet_1
+ surface top_inlet
+ point 15 80 5
+end_compartment
+
+start_compartment inlet_2
+ surface bottom_inlet
+ point 15 20 5
+end_compartment
+
+
+
+mol 300 A 1 1 1
+
+end_file

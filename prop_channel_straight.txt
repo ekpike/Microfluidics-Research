@@ -1,0 +1,74 @@
+#Practice simulation file to show a simple channel
+
+#choose micro metres as channel unit length - reference fig.2 in digital signal processing for molecular comms
+
+#time is in milli seconds 
+#particles will diffuse
+
+graphics opengl #opens up the 3D visualizer
+graphic_iter 10 #frame update frequency , updates every 10 timesteps 
+
+units um ms
+
+dim 3
+boundaries x 0 100 #length
+boundaries y 0 10  #height
+boundaries z 0 5   #width
+
+time_start 0
+time_stop 100
+time_step 0.01  #using standard values from example simulations
+
+species A #sample species which will diffuse along the channel
+
+difc A(all) 100 # the diffusion coefficient is how fast particles spread due to Brownian motion, this is an estimate
+
+color A(all) darkred
+
+# Need to start the diffusion of x many particles near inlet of channel
+
+drift A 0 0 0 # no drift only diffusion 
+
+# assumption that the particles will not absorb to the walls and will stay inside of the channel
+
+#need to model all six walls now
+
+start_surface rect_walls
+ action all both reflect
+  color both 0 0 0 0.0 #this makes the panels transparent
+  thickness 1 #this seems like the default
+
+  panel rect +0 0 0 0 10 5    # left wall  (x=0) +x
+  panel rect -0 100 0 0 10 5  # right wall (x=100) -x
+
+  panel rect +1 0 0 0 100 5   # front wall (y=0) +y 
+  panel rect -1 0 10 0 100 5   # back wall  (y=10) -y 
+
+  panel rect +2 0 0 0 100 10  # top wall   (z=5) -z
+  panel rect -2 0 0 5 100 10  # bottom wall(z=0) +z 
+
+end_surface
+
+
+start_compartment inside
+ surface rect_walls
+ point 50 5 2.5 # define a random point inside of the box
+ 
+end_compartment
+
+
+
+#compartment_mol 200 A inside
+
+mol 300 A 1 1 1   #place particles in one end, diffusing to the other
+
+
+
+# output_files prop_straight-channel.txt
+# cmd e molpos A > straight_channel.txt
+end_file
+
+# xmin ymin xmax ymax 
+# for an x plane -+x x ymin ymax
+# y xmin ymin xmax
+

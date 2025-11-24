@@ -1,0 +1,117 @@
+# Y junction at the microfluidic transmitter 
+graphics opengl
+graphic_iter 10
+
+units um ms
+dim 3
+boundaries x 0 400
+boundaries y 0 200
+boundaries z 0 20
+
+time_start 0
+time_stop 100
+time_step 0.01
+
+species A
+difc A(all) 100
+color A(all) darkred
+drift A 0.1 0 0
+
+species B
+difc B(all) 100
+color B(all) blue
+drift B 0.1 0 0
+
+# ============ MAIN CHANNEL ============
+# Main channel runs from x=30–400, y=40–60, z=0–10
+start_surface main_channel
+ action all both reflect
+ color both 0 0 0 0
+ thickness 1
+
+ # Left wall (x=30) → leave gaps between y=40–60 for inlets
+ panel rect +0 30 0 0 40 10     # lower wall
+ panel rect +0 30 60 0 140 10   # upper wall
+
+ # Right wall (x=400)
+ panel rect -0 400 40 0 20 10
+
+ # Front wall (y=40)
+ panel rect +1 30 40 0 370 10
+
+ # Back wall (y=60)
+ panel rect -1 30 60 0 370 10
+
+ # Floor (z=0)
+ panel rect +2 30 40 0 370 20
+
+ # Ceiling (z=10)
+ panel rect -2 30 40 10 370 20
+end_surface
+
+
+# ============ TOP INLET ============
+# Top inlet prism: x=0–30, y=60–80, z=0–10
+start_surface top_inlet
+ action all both reflect
+ color both 0 0 0 0
+ thickness 1
+
+ # Left wall (x=0)
+ panel rect +0 0 60 0 20 10
+ # Right wall (x=30) — leave OPEN to join main channel
+ # Front wall (y=60)
+ panel rect +1 0 60 0 30 10
+ # Back wall (y=80)
+ panel rect -1 0 80 0 30 10
+ # Floor (z=0)
+ panel rect +2 0 60 0 30 20
+ # Ceiling (z=10)
+ panel rect -2 0 60 10 30 20
+end_surface
+
+
+# ============ BOTTOM INLET ============
+# Bottom inlet prism: x=0–30, y=20–40, z=0–10
+start_surface bottom_inlet
+ action all both reflect
+ color both 0 0 0 0
+ thickness 1
+
+ # Left wall (x=0)
+ panel rect +0 0 20 0 20 10
+ # Right wall (x=30) — leave OPEN to join main channel
+ # Front wall (y=20)
+ panel rect +1 0 20 0 30 10
+ # Back wall (y=40)
+ panel rect -1 0 40 0 30 10
+ # Floor (z=0)
+ panel rect +2 0 20 0 30 20
+ # Ceiling (z=10)
+ panel rect -2 0 20 10 30 20
+end_surface
+
+
+# ============ COMPARTMENTS ============
+start_compartment junction
+ surface main_channel
+ point 100 50 5
+end_compartment
+
+start_compartment inlet_1
+ surface top_inlet
+ point 15 70 5
+end_compartment
+
+start_compartment inlet_2
+ surface bottom_inlet
+ point 15 30 5
+end_compartment
+
+# ============ INITIAL MOLECULES ============
+mol 300 A 10 70 5   # from top inlet
+mol 300 B 10 30 5   # from bottom inlet
+
+mol 100 A 100 50 5  # this proves something isn't closed properly in the main compartment
+
+end_file
