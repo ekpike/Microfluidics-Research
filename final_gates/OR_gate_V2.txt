@@ -123,18 +123,18 @@ panel rect +2 300 0 20 20 40
 # Do NOT close top (y=40): opens into main channel
 end_surface
 
-# output/detector compartment at downstream end (x>450)
+# output/detector compartment at downstream end (x>500)
 start_surface outlet_surface
  action all both reflect
  color both 0 0 0 0.1
  thickness 1
  # small box near x = 450..600, y=40..60, z=0..20
- panel rect +1 450 40 0 150 20
- panel rect -1 450 60 0 150 20
- #panel rect +0 450 40 0 20 20
+ panel rect +1 500 40 0 150 20
+ panel rect -1 500 60 0 150 20
+ #panel rect +0 500 40 0 20 20
  panel rect -0 600 40 0 20 20
- panel rect +2 450 40 0 150 20
- panel rect -2 450 40 20 150 20
+ panel rect +2 500 40 0 150 20
+ panel rect -2 500 40 20 150 20
 end_surface
 
 
@@ -186,7 +186,7 @@ reaction rxnn1 M + I1 -> N 100
 reaction rxnn2 M + I2 -> N 100
 
 output_files or_output.txt
-cmd N 1000 molcountspace N x 450 600 1 40 60 0 20 0 or_output.txt
+cmd N 1000 molcountspace N x 500 600 1 40 60 0 20 0 or_output.txt
 
 # Reminder of colors of reactants
 # M - darkred
@@ -194,3 +194,4 @@ cmd N 1000 molcountspace N x 450 600 1 40 60 0 20 0 or_output.txt
 # I2 - pink 
 # N - lightblue
 end_file
+
