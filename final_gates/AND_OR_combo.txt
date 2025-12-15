@@ -130,11 +130,11 @@ start_surface outlet_surface
  color both 0 0 0 0.1
  thickness 1
 
-panel rect +1 450 400 0 150 20
-panel rect -1 450 420 0 150 20
+panel rect +1 550 400 0 150 20
+panel rect -1 550 420 0 150 20
 panel rect -0 600 400 0 20 20
-panel rect +2 450 400 0 150 20
-panel rect -2 450 400 20 150 20
+panel rect +2 550 400 0 150 20
+panel rect -2 550 400 20 150 20
 end_surface
 
 
@@ -149,7 +149,7 @@ start_surface leftside
  action M back reflect 
  color both 0 0 0 0.1
  thickness 1
- panel rect +0 450 400 0 20 20 
+ panel rect +0 550 400 0 20 20 
 end_surface 
 
 
@@ -228,7 +228,8 @@ cmd @ 500 pointsource M2 50 5 410 10
 
 
 output_files combo_output.txt
-cmd N 1000 molcountspace N x 450 600 1 40 60 0 20 0 combo_output.txt
+cmd N 1000 molcountspace N x 550 600 1 40 60 0 20 0 combo_output.txt
 
 end_file
+
 
