@@ -228,9 +228,10 @@ cmd @ 500 pointsource M2 50 5 410 10
 
 
 output_files combo_output.txt
-cmd N 1000 molcountspace N x 550 600 1 40 60 0 20 0 combo_output.txt
+cmd N 1000 molcountspace O x 550 600 1 40 60 0 20 0 combo_output.txt
 
 end_file
+
 
 
 
